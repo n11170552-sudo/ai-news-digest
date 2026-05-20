@@ -1,4 +1,3 @@
-# AI News Daily Digest workflow
 name: Daily AI News Digest
 
 on:
@@ -15,6 +14,21 @@ jobs:
         with:
           node-version: 24
       - run: npm ci
+      - name: Debug secrets
+        run: |
+          echo "GMAIL_USER: $([ -n \"$GMAIL_USER\" ] && echo 'SET' || echo 'MISSING')"
+          echo "GMAIL_APP_PASSWORD: $([ -n \"$GMAIL_APP_PASSWORD\" ] && echo 'SET (${#GMAIL_APP_PASSWORD} chars)' || echo 'MISSING')"
+          echo "TO_EMAIL: $([ -n \"$TO_EMAIL\" ] && echo 'SET' || echo 'MISSING')"
+          echo "ANTHROPIC_BASE_URL: $([ -n \"$ANTHROPIC_BASE_URL\" ] && echo 'SET' || echo 'MISSING')"
+          echo "ANTHROPIC_AUTH_TOKEN: $([ -n \"$ANTHROPIC_AUTH_TOKEN\" ] && echo 'SET (${#ANTHROPIC_AUTH_TOKEN} chars)' || echo 'MISSING')"
+          echo "ANTHROPIC_MODEL: $([ -n \"$ANTHROPIC_MODEL\" ] && echo 'SET' || echo 'MISSING')"
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
+          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
       - run: node index.js
         env:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}

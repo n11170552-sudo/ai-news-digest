@@ -1,0 +1,72 @@
+{
+  "planPath": "docs/superpowers/plans/2026-05-20-ai-news-digest.md",
+  "tasks": [
+    {
+      "id": 9,
+      "subject": "Task 1: Project Scaffold",
+      "status": "pending",
+      "description": "**Goal:** Initialize the project with package.json, .gitignore, and directory structure.\n\n**Files:**\n- Create: `package.json`\n- Create: `.gitignore`\n- Create: `src/` directory\n\n**Acceptance Criteria:**\n- [ ] `npm install` succeeds without errors\n- [ ] Dependencies installed: rss-parser, @anthropic-ai/sdk, nodemailer\n- [ ] `node --check index.js` passes (even with empty file)\n\n```json:metadata\n{\"files\": [\"package.json\", \".gitignore\"], \"verifyCommand\": \"npm install && node -e \\\"require('rss-parser'); require('@anthropic-ai/sdk'); require('nodemailer'); console.log('OK')\\\"\", \"acceptanceCriteria\": [\"npm install succeeds\", \"Dependencies installed\", \"node --check index.js passes\"]}\n```"
+    },
+    {
+      "id": 11,
+      "subject": "Task 2: Config Module",
+      "status": "pending",
+      "description": "**Goal:** Centralize all configuration — news sources, email settings, AI API params — read from env vars where sensitive.\n\n**Files:**\n- Create: `src/config.js`\n\n**Acceptance Criteria:**\n- [ ] Exports `sources` array with 5 RSS feeds (name, url, lang)\n- [ ] Exports `email` object with from/to/smtp using env vars\n- [ ] Exports `anthropic` object with baseURL/apiKey/model from env vars\n- [ ] Exports `maxArticlesPerSource` (3) and `maxTotalArticles` (10)\n\n```json:metadata\n{\"files\": [\"src/config.js\"], \"verifyCommand\": \"node -e \\\"const c = require('./src/config'); console.log(c.sources.length, c.maxTotalArticles)\\\"\", \"acceptanceCriteria\": [\"Exports 5 RSS sources\", \"Exports email config from env vars\", \"Exports anthropic config from env vars\", \"Exports maxArticlesPerSource=3, maxTotalArticles=10\"]}\n```"
+    },
+    {
+      "id": 13,
+      "subject": "Task 3: RSS Fetch Module",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "**Goal:** Fetch RSS feeds from all configured sources, parse articles, deduplicate by URL, return top N.\n\n**Files:**\n- Create: `src/fetch.js`\n\n**Acceptance Criteria:**\n- [ ] `fetchAll()` returns array of articles with `{title, url, source, lang, rawContent}`\n- [ ] Each source limited to `maxArticlesPerSource` (3)\n- [ ] Total limited to `maxTotalArticles` (10)\n- [ ] Deduplicates by URL\n- [ ] Single source failure does not crash entire fetch\n\n```json:metadata\n{\"files\": [\"src/fetch.js\"], \"verifyCommand\": \"node -e \\\"const {fetchAll} = require('./src/fetch'); fetchAll().then(a => console.log(a.length, a[0].title))\\\"\", \"acceptanceCriteria\": [\"Returns articles with title, url, source, lang, rawContent\", \"Per-source limit of 3 articles\", \"Total limit of 10 articles\", \"Deduplicates by URL\", \"Single source failure does not crash\"]}\n```"
+    },
+    {
+      "id": 10,
+      "subject": "Task 4: AI Summarize Module",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "**Goal:** Call DeepSeek Anthropic API to translate/summarize each article into Chinese (≤50 chars) with a category tag, preserving English technical terms.\n\n**Files:**\n- Create: `src/summarize.js`\n\n**Acceptance Criteria:**\n- [ ] `summarizeAll(articles)` returns articles enriched with `{tag, summary}`\n- [ ] Chinese sources are condensed, not re-translated\n- [ ] English sources are translated to Chinese with tech terms preserved\n- [ ] API failure on one article skips that item with fallback, does not crash batch\n\n```json:metadata\n{\"files\": [\"src/summarize.js\"], \"verifyCommand\": \"node -e \\\"const {summarizeAll} = require('./src/summarize'); summarizeAll([{title:'GPT-5 released',rawContent:'OpenAI announced GPT-5 with video reasoning',lang:'en',url:'http://x.com',source:'Test'}]).then(r => console.log(r[0]))\\\"\", \"acceptanceCriteria\": [\"Returns articles enriched with tag and summary\", \"Chinese sources condensed only\", \"English sources translated with tech terms preserved\", \"API failure falls back, does not crash\"]}\n```"
+    },
+    {
+      "id": 12,
+      "subject": "Task 5: Email HTML Template",
+      "status": "pending",
+      "description": "**Goal:** Generate the HTML email body from summarized articles with proper styling.\n\n**Files:**\n- Create: `src/template.js`\n\n**Acceptance Criteria:**\n- [ ] `buildEmail(articles, date)` returns valid HTML string\n- [ ] Each article rendered with tag badge, title, summary, source link\n- [ ] `buildSubject(date)` returns formatted subject line\n- [ ] Footer contains crawl timestamp\n\n```json:metadata\n{\"files\": [\"src/template.js\"], \"verifyCommand\": \"node -e \\\"const {buildEmail,buildSubject} = require('./src/template'); const h = buildEmail([{title:'Test',summary:'test',tag:'产品发布',url:'http://x.com',source:'Test'}], new Date()); console.log(h.includes('产品发布'), h.includes('Test'), buildSubject(new Date()).includes('AI 新闻早报'))\\\"\", \"acceptanceCriteria\": [\"buildEmail returns valid HTML\", \"Articles rendered with tag, title, summary, link\", \"buildSubject returns formatted subject\", \"Footer has crawl timestamp\"]}\n```"
+    },
+    {
+      "id": 15,
+      "subject": "Task 6: Email Send Module",
+      "status": "pending",
+      "blockedBy": [9],
+      "description": "**Goal:** Send formatted HTML email via Gmail SMTP using nodemailer.\n\n**Files:**\n- Create: `src/email.js`\n\n**Acceptance Criteria:**\n- [ ] `send(html, date)` sends email with correct subject, HTML body, from/to addresses\n- [ ] Uses `buildSubject()` from template module for subject line\n- [ ] SMTP connection uses TLS on port 587\n\n```json:metadata\n{\"files\": [\"src/email.js\"], \"verifyCommand\": \"node -e \\\"const {send} = require('./src/email'); send('<h1>Test</h1>', new Date()).then(() => console.log('OK')).catch(e => console.error(e.message))\\\"\", \"acceptanceCriteria\": [\"Sends email with correct subject and HTML body\", \"Uses buildSubject from template module\", \"SMTP uses TLS on port 587\"]}\n```"
+    },
+    {
+      "id": 16,
+      "subject": "Task 7: Main Entry Point",
+      "status": "pending",
+      "blockedBy": [13, 10, 15],
+      "description": "**Goal:** Orchestrate the full pipeline — fetch → summarize → build email → send.\n\n**Files:**\n- Create: `index.js`\n\n**Acceptance Criteria:**\n- [ ] Running `node index.js` executes the full pipeline\n- [ ] Each step logs progress to console\n- [ ] Errors are caught and logged, process exits with code 1 on failure\n- [ ] Works end-to-end with valid env vars\n\n```json:metadata\n{\"files\": [\"index.js\"], \"verifyCommand\": \"node index.js\", \"acceptanceCriteria\": [\"Executes full pipeline: fetch→summarize→email→send\", \"Each step logs progress\", \"Errors caught, exits code 1\", \"End-to-end works with valid env vars\"]}\n```"
+    },
+    {
+      "id": 17,
+      "subject": "Task 8: GitHub Actions Workflow",
+      "status": "pending",
+      "blockedBy": [16],
+      "description": "**Goal:** Schedule the script to run daily at 9:00 AM Beijing time via GitHub Actions, with manual trigger support.\n\n**Files:**\n- Create: `.github/workflows/daily.yml`\n\n**Acceptance Criteria:**\n- [ ] Cron schedule: `0 1 * * *` (UTC 1:00 = Beijing 9:00)\n- [ ] `workflow_dispatch` allows manual trigger from Actions tab\n- [ ] All 6 secrets passed as env vars\n- [ ] Uses Node.js 24, runs `npm ci` then `node index.js`\n\n```json:metadata\n{\"files\": [\".github/workflows/daily.yml\"], \"verifyCommand\": \"git push origin main && gh run list --workflow=daily.yml --limit 1\", \"acceptanceCriteria\": [\"Cron schedule 0 1 * * * (9am Beijing)\", \"workflow_dispatch manual trigger\", \"All 6 secrets passed as env vars\", \"Uses Node.js 24 with npm ci\"]}\n```"
+    },
+    {
+      "id": 14,
+      "subject": "Task 9: README & Setup Guide",
+      "status": "pending",
+      "description": "**Goal:** Document setup instructions so the project can be reused or handed off.\n\n**Files:**\n- Create: `README.md`\n- Create: `.env.example`\n\n**Acceptance Criteria:**\n- [ ] Covers Gmail App Password setup steps\n- [ ] Lists all 6 GitHub Secrets with descriptions\n- [ ] Shows how to manually trigger first run\n- [ ] Documents local testing procedure\n\n```json:metadata\n{\"files\": [\"README.md\", \".env.example\"], \"verifyCommand\": \"cat README.md\", \"acceptanceCriteria\": [\"Gmail App Password setup documented\", \"All 6 GitHub Secrets listed\", \"Manual trigger instructions included\", \"Local testing procedure documented\"]}\n```"
+    },
+    {
+      "id": 18,
+      "subject": "Task 10: End-to-End Validation",
+      "status": "pending",
+      "blockedBy": [16, 17],
+      "description": "**Goal:** Verify the complete pipeline works by running index.js locally and confirming all 4 stages complete and email arrives in inbox.\n\n**Files:**\n- None (verification only)\n\n**Acceptance Criteria:**\n- [ ] All 5 RSS sources produce articles\n- [ ] Summaries are generated for each article\n- [ ] HTML email is rendered correctly\n- [ ] Email arrives in target inbox\n\n```json:metadata\n{\"files\": [], \"verifyCommand\": \"node index.js\", \"acceptanceCriteria\": [\"All 5 RSS sources produce articles\", \"Summaries generated for each article\", \"HTML email rendered correctly\", \"Email arrives in target inbox\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-05-20T00:00:00+08:00"
+}

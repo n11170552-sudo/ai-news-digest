@@ -17,7 +17,8 @@ async function fetchAll() {
           source: source.name,
           lang: source.lang,
           rawContent: item.contentSnippet || item.content || ''
-        }));
+        }))
+        .filter(item => item.url);
       allArticles.push(...articles);
       console.log(`  ${source.name}: ${articles.length} articles`);
     } catch (err) {
